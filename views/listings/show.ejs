@@ -1,186 +1,293 @@
-<!-- 
-<% layout("/layouts/boilerplate") -%>
 
-<div class="row mt-4 justify-content-center">
-  <div class="col-12 d-flex justify-content-center">
-
-    <div class="show-card">
-
-      <h3 class="mb-3"><%= listing.title %></h3>
-
-      <div class="card shadow-sm">
-     
-        <img
-          src="<%= listing.image.url %>"
-          class="card-img-top show-img"
-        >
-
-        <div class="card-body">
-        
-
-          <p class="card-text">
-            <%= listing.description %>
-          </p>
-
-          <p class="fw-semibold mb-1">
-            ₹ <%= listing.price.toLocaleString("en-IN") %>
-          </p>
-
-          <p class="text-muted mb-0">
-            <%= listing.location %>, <%= listing.country %>
-          </p>
-        </div>
-      </div>
-
-      <div class="mt-3 d-flex gap-2">
-        <a
-          href="/listings/<%= listing._id %>/edit"
-          class="btn btn-dark"> Edit</a>
-
-        <form
-          method="POST"
-          action="/listings/<%= listing._id %>?_method=DELETE"
-        >
-          <button class="btn btn-danger">
-            Delete
-          </button>
-        </form>
-      </div>
-      <div class="col-8 offset-3 mb-3" >
-        <hr>
-       <h4 class="mb-4 text-center">Leave a Review</h4>
-        <form >
-          <div class="mb-3 mt-3">
-            <label for="rating" class="form-label">Rating</label>
-            <input type="range" min="1" max="5" id="rating" name="review[rating] " class="form-range">
-          </div>
-
-             <div class="mb-3 mt-3">
-            <label for="comment" class="form-label">Comments</label>
-             <textarea name="review[comment]" 
-             id="comment"   
-             class="form-control"
-              cols="30" 
-             rows="5">
-            </textarea>
-          </div>
-          <button class="btn btn-outline-dark">Submit</button>
-        </form>
-
-      </div>
-
-    </div>
-  </div>
-</div> -->
 
 <% layout("/layouts/boilerplate") -%>
 
-<div class="row mt-4 justify-content-center">
-  <div class="col-md-6">
-<div class="show-card">
+<div class="container mt-4">
 
-  <h3 class="mb-3"><%= listing.title %></h3>
+  <!-- LISTING TITLE -->
+  <h2 class="fw-bold mb-3">
+    <%= listing.title %>
+  </h2>
 
-  <div class="card shadow-sm">
+  <!-- IMAGE -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
     <img
-      src="<%= listing.image.url %>"
-      class="card-img-top show-img"
-    >
+  src="<%= listing.image && listing.image.url ? listing.image.url : 'https://images.unsplash.com/photo-1625505826533-5c80aca7d157?q=80' %>"
+  class="card-img-top show-img"
+  alt="listing image"
+>
 
-    <div class="card-body">
+    <div class="card-body p-4">
 
-      <p class="card-text">
+      <!-- OWNER -->
+      <p class="mb-2 text-muted">
+        Hosted by
+        <span class="fw-semibold">
+          <%= listing.owner.username %>
+        </span>
+      </p>
+
+      <!-- DESCRIPTION -->
+      <p class="card-text fs-6">
         <%= listing.description %>
       </p>
 
-      <p class="fw-semibold mb-1">
+      <!-- PRICE -->
+      <h4 class="fw-bold mt-3">
         ₹ <%= listing.price.toLocaleString("en-IN") %>
-      </p>
+      </h4>
 
-      <p class="text-muted mb-0">
+      <!-- LOCATION -->
+      <p class="text-muted">
         <%= listing.location %>, <%= listing.country %>
       </p>
 
+      <!-- EDIT + DELETE -->
+      <% if(currUser && listing.owner._id.equals(currUser._id)){ %>
+
+        <div class="d-flex gap-2 mt-3">
+
+          <a
+            href="/listings/<%= listing._id %>/edit"
+            class="btn btn-dark rounded-pill px-4"
+          >
+            Edit
+          </a>
+
+          <form
+            method="POST"
+            action="/listings/<%= listing._id %>?_method=DELETE"
+          >
+            <button class="btn btn-danger rounded-pill px-4">
+              Delete
+            </button>
+          </form>
+
+        </div>
+
+      <% } %>
+
     </div>
   </div>
 
-  <div class="mt-3 d-flex gap-2">
-    <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark">
-      Edit
-    </a>
+  <!-- REVIEW FORM -->
+  <% if(currUser){ %>
 
-    <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
-      <button class="btn btn-danger">
-        Delete
-      </button>
-    </form>
-  </div>
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
 
-  <hr class="mt-4">
+      <h4 class="fw-bold mb-4">
+        Leave a Review
+      </h4>
 
-  <h4 class="mb-4 text-center">Leave a Review</h4>
+      <form
+        method="POST"
+        action="/listings/<%= listing._id %>/reviews"
+        novalidate
+        class="needs-validation"
+      >
 
-  <form method="POST" action="/listings/<%= listing._id %>/reviews" novalidate class="needs-validation">
+        <!-- STAR RATING -->
+        <div class="mb-4">
 
-    <div class="mb-3">
-      <label for="rating" class="form-label">Rating</label>
-      <input 
-        type="range" 
-        min="1" 
-        max="5" 
-        id="rating" 
-        name="review[rating]" 
-        class="form-range">
-    </div>
+  <label class="form-label fw-semibold">
+    Your Rating
+  </label>
 
-    <div class="mb-3">
-      <label for="comment" class="form-label">Comments</label>
-      <textarea 
-        name="review[comment]" 
-        id="comment"   
-        class="form-control"
-        rows="5"
-        required
-        >
-      
-      </textarea>
-      <div class="invalid-feedback">Please add some comments for review</div>
-    </div>
+  <fieldset class="starability-slot">
 
-    <button class="btn btn-dark">
-      Submit
-    </button>
+    <input type="radio" id="rate1" name="review[rating]" value="1" />
+    <label for="rate1">1 star</label>
 
-  </form>
+    <input type="radio" id="rate2" name="review[rating]" value="2" />
+    <label for="rate2">2 stars</label>
+
+    <input type="radio" id="rate3" name="review[rating]" value="3" />
+    <label for="rate3">3 stars</label>
+
+    <input type="radio" id="rate4" name="review[rating]" value="4" />
+    <label for="rate4">4 stars</label>
+
+    <input
+      type="radio"
+      id="rate5"
+      name="review[rating]"
+      value="5"
+      checked
+    />
+    <label for="rate5">5 stars</label>
+
+  </fieldset>
+
 </div>
-<hr>
+         
 
-<p class="fw-bold fs-5">All Reviews</p>
+        <!-- COMMENT -->
+        <div class="mb-4">
 
-<% for (let review of listing.reviews) { %>
+          <label
+            for="comment"
+            class="form-label fw-semibold"
+          >
+            Comments
+          </label>
 
-  <div class="card mb-3 shadow-sm">
-    <div class="card-body mb-6 ">
+          <textarea
+            name="review[comment]"
+            id="comment"
+            rows="5"
+            class="form-control rounded-4"
+            placeholder="Share your experience..."
+            required
+          ></textarea>
 
-      <h5 class="card-title text-primary">Jhon Doe</h5>
+          <div class="invalid-feedback">
+            Please write something.
+          </div>
 
-      <p class="card-text mb-2">
-        <%= review.comment %>
-      </p>
+        </div>
 
-      <p class="card-text">
-        ⭐ <%= review.rating %> / 5
-      </p>
+        <button class="btn btn-dark rounded-pill px-4">
+          Submit Review
+        </button>
+
+      </form>
 
     </div>
+
+  <% } %>
+
+  <!-- ALL REVIEWS -->
+   <% if(listing.reviews.length>0)  {%>
+  <div class="mb-4">
+
+    <h3 class="fw-bold">
+      Guest Reviews
+    </h3>
+
+  </div>
+
+  <div class="row">
+
+    <% for(let review of listing.reviews){ %>
+
+      <div class="col-md-6 mb-4">
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 review-card">
+
+          <!-- USER -->
+          <div class="d-flex align-items-center mb-3">
+
+            <!-- AVATAR -->
+           <div class="me-3">
+  <img
+    src="https://i.pravatar.cc/100?img=<%= Math.floor(Math.random()*70) + 1 %>"
+    alt="avatar"
+    class="review-avatar"
+  >
+</div>
+
+            <!-- USERNAME + STARS -->
+            <div>
+
+              <h6 class="fw-bold mb-1">
+                @<%= review.author.username %>
+              </h6>
+
+              <p
+                class="starability-result m-0"
+                data-rating="<%= review.rating %>"
+              >
+                Rated:
+                <%= review.rating %> stars
+              </p>
+
+            </div>
+
+          </div>
+
+          <!-- COMMENT -->
+          <p class="text-muted mb-4">
+            <%= review.comment %>
+          </p>
+
+          <!-- DELETE REVIEW -->
+          <% if(
+              currUser &&
+              review.author._id.equals(currUser._id)
+          ){ %>
+
+            <form
+              action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+              method="POST"
+            >
+
+              <button
+                class="btn btn-outline-dark btn-sm rounded-pill"
+              >
+                Delete
+              </button>
+
+            </form>
+
+          <% } %>
+
+        </div>
+
+      </div>
+
+    <% } %>
+
     
-    <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
-  <button class="btn btn-sm btn-dark mb-3">Delete</button>
-</form>
-    </form>
-  </div>
 
+  </div>
 <% } %>
+  <div class="col-8 offset-3 mb-3">
+      <h3>Where you'll be</h3>
+      <div id="map"></div>
+      </div>
+<script>
+    <% if (
+        listing.geometry &&
+        Array.isArray(listing.geometry.coordinates) &&
+        listing.geometry.coordinates.length === 2
+    ) { %>
 
-  </div>
+        const coordinates =
+            <%- JSON.stringify(listing.geometry.coordinates) %>;
+
+        const longitude = Number(coordinates[0]);
+        const latitude = Number(coordinates[1]);
+
+        const map = L.map("map").setView(
+            [latitude, longitude],
+            13
+        );
+
+        L.tileLayer(
+            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                attribution: '&copy; OpenStreetMap contributors'
+            }
+        ).addTo(map);
+
+        L.marker([latitude, longitude])
+            .addTo(map)
+            .bindPopup("<%= listing.title %>")
+            .openPopup();
+
+    <% } else { %>
+
+        document.getElementById("map").innerHTML = `
+            <div class="alert alert-warning">
+                Location coordinates are not available for this listing.
+            </div>
+        `;
+
+    <% } %>
+</script>
+
+
+
+
 </div>
+
