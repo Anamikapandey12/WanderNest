@@ -130,6 +130,8 @@ app.use((err, req, res, next) => {
   res.status(status).render("error.ejs", { err });
   // res.status(status).send(message);
 });
+const bookingRouter = require("./routes/booking");
+app.use("/listings/:id/bookings", bookingRouter);
 app.listen(8080,()=>{
   console.log(" server is listening on the port 8080" );
   

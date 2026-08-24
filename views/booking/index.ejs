@@ -1,0 +1,35 @@
+<% layout("/layouts/boilerplate") -%>
+
+<div class="container mt-4">
+  <h2 class="fw-bold mb-4">My Bookings</h2>
+
+  <div class="row">
+    <% for (let booking of bookings) { %>
+      <% if (booking.listing) { %>
+        <div class="col-12 col-md-6 mb-4">
+          <div class="card border-0 shadow-sm rounded-4 p-3">
+            <div class="d-flex flex-wrap gap-3">
+              <img src="<%= booking.listing.image.url %>" style="width:120px; height:90px; object-fit:cover; border-radius:0.75rem;">
+              <div class="flex-grow-1">
+                <h6 class="fw-bold mb-1"><%= booking.listing.title %></h6>
+                <p class="small text-muted mb-1">
+                  <%= booking.checkIn.toDateString() %> → <%= booking.checkOut.toDateString() %>
+                </p>
+                <p class="small mb-1">₹<%= booking.totalPrice.toLocaleString("en-IN") %> · <%= booking.totalNights %> nights</p>
+                <span class="badge <%= booking.status === 'confirmed' ? 'bg-success' : 'bg-secondary' %>">
+                  <%= booking.status %>
+                </span>
+              </div>
+            </div>
+
+            <% if (booking.status === "confirmed") { %>
+              <form method="POST" action="/listings/<%= booking.listing._id %>/bookings/<%= booking._id %>?_method=DELETE" class="mt-2">
+                <button class="btn btn-outline-danger btn-sm rounded-pill">Cancel Booking</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+</div>
