@@ -3,7 +3,7 @@ const ExpressError = require("./utils/ExpressError.js");
 
 const { listingSchema,reviewSchema } = require("./schema.js");
 const Listing=require("./Models/listing")
-module.exports.isloggedin=(req,res,next)=>{
+module.exports.isloggedIn=(req,res,next)=>{
 
     
     if(!req.isAuthenticated()){
