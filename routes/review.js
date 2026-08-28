@@ -8,11 +8,11 @@ const ExpressError = require("../utils/ExpressError.js");
 const { reviewSchema } = require("../schema.js");
 const Listing = require("../Models/listing.js");
 const Review = require("../Models/review.js");
-const {validateReview, isloggedin}=require("../middleware.js")
+const {validateReview, isloggedIn}=require("../middleware.js")
 
 const reviewController=require("../controller/review.js")
 
-router.post("/",isloggedin,
+router.post("/",isloggedIn,
   validateReview,
   wrapAsync(reviewController.createReview))
 
