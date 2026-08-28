@@ -1,80 +1,78 @@
-const passport=require("passport")
+const passport = require("passport")
 
-if(process.env.NODE_ENV !="production"){
-     require('dotenv').config();
+if (process.env.NODE_ENV != "production") {
+    require('dotenv').config();
 }
 
-const mongoose=require("mongoose");
-const express=require("express");
-const app=express();
-const path=require("path");
-const ejsMate=require("ejs-mate");
-const session=require("express-session");
+const mongoose = require("mongoose");
+const express = require("express");
+const app = express();
+const path = require("path");
+const ejsMate = require("ejs-mate");
+const session = require("express-session");
 const { MongoStore } = require("connect-mongo");
-const flash=require("connect-flash");
+const flash = require("connect-flash");
 
-const LocalStrategy=require("passport-local");
+const LocalStrategy = require("passport-local");
 
-const User=require("./Models/user.js")
+const User = require("./Models/user.js")
 
-const ExpressError=require("./utils/ExpressError.js");
+const ExpressError = require("./utils/ExpressError.js");
 
-const dbUrl=process.env.ATLS_DB
+const dbUrl = process.env.ATLS_DB
 
-main().then(()=>{
-  console.log("connected to db");
-  
-}).catch((err)=>{
-  console.log(err);
-  
+main().then(() => {
+    console.log("connected to db");
+
+}).catch((err) => {
+    console.log(err);
+
 })
 
 async function main() {
-  await mongoose.connect(dbUrl);
+    await mongoose.connect(dbUrl);
 
 }
-app.set("view engine","ejs")
-app.set("views",path.join(__dirname,"views"))
+app.set("view engine", "ejs")
+app.set("views", path.join(__dirname, "views"))
 const methodOverride = require("method-override");
 
 const listingsRouter = require("./routes/listing.js");
 const reviewsRouter = require("./routes/review.js");
-const userRouter=require("./routes/user.js")
+const userRouter = require("./routes/user.js")
+const bookingRouter = require("./routes/booking");
 
 app.use(express.urlencoded({ extended: true }));
- app.use(express.json());
+app.use(express.json());
 app.use(methodOverride("_method"));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
 
 
-const store=MongoStore.create({
-  mongoUrl:dbUrl,
-  crypto:{
-    secret:process.env.SECRET,
-  },
-  touchAfter:24*3600,
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    crypto: {
+        secret: process.env.SECRET,
+    },
+    touchAfter: 24 * 3600,
 
 });
-store.on("error",(err)=>{
-  console.log("Error in MONGO SESSION STORE",err);
-  
+store.on("error", (err) => {
+    console.log("Error in MONGO SESSION STORE", err);
+
 })
 
-const sessionOptions ={
-  store,
-  secret:process.env.SECRET,
-  resave:false,
-  saveUninitialized:true,
-  cookie:{
-    expires:Date.now()+ 7*24*60*60*1000,
-    maxAge:7*24*60*60*1000,
-    httpOnly:true,
-  }
+const sessionOptions = {
+    store,
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+    }
 };
-
-
-
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -94,25 +92,31 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/demouser", async (req,res)=>{
-  let fakeUser = new User({
-    email:"studentgmail.com",
-    username:"delta123"
-  });
+app.get("/demouser", async (req, res) => {
+    let fakeUser = new User({
+        email: "studentgmail.com",
+        username: "delta123"
+    });
 
-  let registerUser = await User.register(fakeUser,"heloo123");
+    let registerUser = await User.register(fakeUser, "heloo123");
 
-  res.send(registerUser);
+    res.send(registerUser);
 });
 
+// Root route -> redirect to listings
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
 
-app.use("/listings/:id/reviews",reviewsRouter);
-app.use("/listings",listingsRouter);
-app.use("/",userRouter);
+app.use("/listings/:id/reviews", reviewsRouter);
+app.use("/listings/:id/bookings", bookingRouter);
+app.use("/listings", listingsRouter);
+app.use("/", userRouter);
 
 app.get("/.well-known/appspecific/com.chrome.devtools.json", (req, res) => {
     res.status(204).end();
 });
+
 app.use((req, res, next) => {
     console.log("================================");
     console.log("404 REQUEST");
@@ -124,15 +128,14 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log(err);
+    console.log(err);
 
-  let { status = 500, message = "Something went wrong" } = err;
-  res.status(status).render("error.ejs", { err });
-  // res.status(status).send(message);
+    let { status = 500, message = "Something went wrong" } = err;
+    res.status(status).render("error.ejs", { err });
+    // res.status(status).send(message);
 });
-const bookingRouter = require("./routes/booking");
-app.use("/listings/:id/bookings", bookingRouter);
-app.listen(8080,()=>{
-  console.log(" server is listening on the port 8080" );
-  
+
+app.listen(8080, () => {
+    console.log(" server is listening on the port 8080");
+
 })
