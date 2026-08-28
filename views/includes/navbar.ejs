@@ -23,8 +23,18 @@
   }
 
   /* Responsiveness fixes */
-  .navbar .d-flex {
+  .navbar .navbar-collapse {
     flex-wrap: wrap;
+  }
+
+  form[role="search"] {
+    flex-wrap: nowrap;
+  }
+
+  @media (min-width: 768px) and (max-width: 991px) {
+    form[role="search"] {
+      max-width: 260px;
+    }
   }
 
   @media (max-width: 767px) {
