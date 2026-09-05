@@ -1,4 +1,4 @@
-const Listing=require("../Models/listing");
+const Listing = require("../Models/listing");
 const Booking = require("../Models/booking");
 
 module.exports.createBooking = async (req, res) => {
@@ -8,7 +8,6 @@ module.exports.createBooking = async (req, res) => {
   const checkInDate = new Date(checkIn);
   const checkOutDate = new Date(checkOut);
 
-  // Basic validation
   if (checkInDate >= checkOutDate) {
     req.flash("error", "Check-out date must be after check-in date.");
     return res.redirect(`/listings/${id}`);
@@ -19,7 +18,6 @@ module.exports.createBooking = async (req, res) => {
     return res.redirect(`/listings/${id}`);
   }
 
-  // Availability check: does any existing confirmed booking overlap?
   const overlapping = await Booking.findOne({
     listing: id,
     status: "confirmed",
@@ -59,16 +57,16 @@ module.exports.myBookings = async (req, res) => {
 };
 
 module.exports.cancelBooking = async (req, res) => {
-  const { id, bookingId } = req.params;
+  const { bookingId } = req.params;
   const booking = await Booking.findById(bookingId);
 
   if (!booking.user.equals(req.user._id)) {
     req.flash("error", "You are not authorized to cancel this booking.");
-    return res.redirect(`/listings/${id}`);
+    return res.redirect("/bookings/my-bookings");
   }
 
   booking.status = "cancelled";
   await booking.save();
   req.flash("success", "Booking cancelled.");
-  res.redirect("/listings/" + id + "/bookings/my-bookings");
+  res.redirect("/bookings/my-bookings");
 };
